@@ -1,5 +1,6 @@
 package ru.itmo.java;
 
+import java.lang.annotation.ElementType;
 import java.util.Arrays;
 
 public class HashTable {
@@ -8,6 +9,7 @@ public class HashTable {
     private int size;
     private Entry[] elements;
     private boolean[] delete;
+    private int length;
 
     public HashTable() {
         this(INITIAL_CAPACITY);
@@ -19,71 +21,76 @@ public class HashTable {
 
     public HashTable(int size, double loadFactor) {
         this.elements = new Entry[size];
+        this.length = size;
         this.loadFactor = loadFactor;
         this.delete = new boolean[size];
     }
 
-    public Object put(Object key, Object value) {
-        int hs = Math.abs(key.hashCode() % elements.length);
+    public Entry getElement(int ind){
+        return elements[ind];
+    }
 
-        while (delete[hs] || elements[hs] != null && !elements[hs].key.equals(key)) {
-            hs = (hs + 1) % elements.length;
+    public Object put(Object key, Object value) {
+        int hc = Math.abs(key.hashCode() % length);
+
+        while (delete[hc] || elements[hc] != null && !elements[hc].key.equals(key)) {
+            hc = (hc + 1) % length;
         }
 
-        if (elements[hs] == null) {
-            hs = Math.abs(key.hashCode() % elements.length);
+        if (elements[hc] == null) {
+            hc = Math.abs(key.hashCode() % length);
 
-            while (elements[hs] != null) {
-                hs = (hs + 1) % elements.length;
+            while (elements[hc] != null) {
+                hc = (hc + 1) % length;
             }
 
-            elements[hs] = new Entry(key, value);
-            delete[hs] = false;
+            elements[hc] = new Entry(key, value);
+            delete[hc] = false;
             size++;
 
             return null;
         }
 
-        Object OutValue = elements[hs].value;
-        elements[hs] = new Entry(key, value);
-        delete[hs] = false;
+        Object outValue = elements[hc].value;
+        elements[hc] = new Entry(key, value);
+        delete[hc] = false;
 
-        if ((double) size / elements.length > loadFactor) {
+        if ((double) size / length > loadFactor) {
             IncreaseCapacity();
         }
 
-        return OutValue;
+        return outValue;
     }
 
     public Object get(Object key) {
-        int hs = Math.abs(key.hashCode() % elements.length);
+        int hc = Math.abs(key.hashCode() % length);
 
-        while (delete[hs] || elements[hs] != null && !elements[hs].key.equals(key)) {
-            hs = (hs + 1) % elements.length;
+        while (delete[hc] || elements[hc] != null && !elements[hc].key.equals(key)) {
+            hc = (hc + 1) % length;
         }
 
-        if (elements[hs] != null) {
-            return elements[hs].value;
+        if (elements[hc] != null) {
+            return elements[hc].value;
         } else {
             return null;
         }
     }
 
     public Object remove(Object key) {
-        int hs = Math.abs(key.hashCode() % elements.length);
+        int hc = Math.abs(key.hashCode() % length);
 
-        while (delete[hs] || elements[hs] != null && !elements[hs].key.equals(key)) {
-            hs = (hs + 1) % elements.length;
+        while (delete[hc] || elements[hc] != null && !elements[hc].key.equals(key)) {
+            hc = (hc + 1) % length;
         }
 
-        if (elements[hs] == null) {
+        if (elements[hc] == null) {
             return null;
         } else {
-            Object OutValue = elements[hs].value;
-            elements[hs] = null;
-            delete[hs] = true;
+            Object outValue = elements[hc].value;
+            elements[hc] = null;
+            delete[hc] = true;
             size--;
-            return OutValue;
+            return outValue;
         }
     }
 
@@ -93,28 +100,38 @@ public class HashTable {
 
 
     private void IncreaseCapacity() {
-        Entry[] newElements = new Entry[elements.length * 2];
-        delete = new boolean[elements.length * 2];
+        Entry[] newElements = new Entry[length * 2];
+        delete = new boolean[length * 2];
 
-        for (int i = 0; i < elements.length; i++) {
+        for (int i = 0; i < length; i++) {
             if (elements[i] == null) {
                 continue;
             }
 
-            int hs = Math.abs(elements[i].key.hashCode() % newElements.length);
+            int hс = Math.abs(elements[i].key.hashCode() % (length * 2));
 
-            while (newElements[hs] != null) {
-                hs = (hs + 1) % newElements.length;
+            while (newElements[hс] != null) {
+                hс = (hс + 1) % (length * 2);
             }
 
-            newElements[hs] = elements[i];
+            newElements[hс] = elements[i];
         }
 
         elements = newElements;
+        length *= 2;
     }
 
     private class Entry {
-        Object key, value;
+        private final Object key,
+                             value;
+
+        public Object getKey(){
+            return key;
+        }
+
+        public Object getValue(){
+            return value;
+        }
 
         public Entry(Object key, Object value) {
             this.key = key;
