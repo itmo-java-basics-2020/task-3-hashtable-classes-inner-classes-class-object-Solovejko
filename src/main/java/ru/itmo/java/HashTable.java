@@ -26,14 +26,10 @@ public class HashTable {
         this.delete = new boolean[size];
     }
 
-    public Entry getElement(int ind){
-        return elements[ind];
-    }
-
     public Object put(Object key, Object value) {
         int hc = Math.abs(key.hashCode() % length);
 
-        while (delete[hc] || elements[hc] != null && !elements[hc].key.equals(key)) {
+        while (delete[hc] || elements[hc] != null && !elements[hc].getKey().equals(key)) {
             hc = (hc + 1) % length;
         }
 
@@ -51,7 +47,7 @@ public class HashTable {
             return null;
         }
 
-        Object outValue = elements[hc].value;
+        Object outValue = elements[hc].getValue();
         elements[hc] = new Entry(key, value);
         delete[hc] = false;
 
@@ -65,12 +61,12 @@ public class HashTable {
     public Object get(Object key) {
         int hc = Math.abs(key.hashCode() % length);
 
-        while (delete[hc] || elements[hc] != null && !elements[hc].key.equals(key)) {
+        while (delete[hc] || elements[hc] != null && !elements[hc].getKey().equals(key)) {
             hc = (hc + 1) % length;
         }
 
         if (elements[hc] != null) {
-            return elements[hc].value;
+            return elements[hc].getValue();
         } else {
             return null;
         }
@@ -79,14 +75,14 @@ public class HashTable {
     public Object remove(Object key) {
         int hc = Math.abs(key.hashCode() % length);
 
-        while (delete[hc] || elements[hc] != null && !elements[hc].key.equals(key)) {
+        while (delete[hc] || elements[hc] != null && !elements[hc].getKey().equals(key)) {
             hc = (hc + 1) % length;
         }
 
         if (elements[hc] == null) {
             return null;
         } else {
-            Object outValue = elements[hc].value;
+            Object outValue = elements[hc].getValue();
             elements[hc] = null;
             delete[hc] = true;
             size--;
@@ -108,7 +104,7 @@ public class HashTable {
                 continue;
             }
 
-            int hс = Math.abs(elements[i].key.hashCode() % (length * 2));
+            int hс = Math.abs(elements[i].getKey().hashCode() % (length * 2));
 
             while (newElements[hс] != null) {
                 hс = (hс + 1) % (length * 2);
