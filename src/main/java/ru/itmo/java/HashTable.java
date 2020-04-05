@@ -1,23 +1,137 @@
 package ru.itmo.java;
 
-import java.util.Map;
+import java.lang.annotation.ElementType;
+import java.util.Arrays;
 
 public class HashTable {
+    private final static int INITIAL_CAPACITY = 10;
+    private double loadFactor;
+    private int size;
+    private Entry[] elements;
+    private boolean[] delete;
+    private int length;
 
-    Object put(Object key, Object value) {
-        throw new UnsupportedOperationException();
+    public HashTable() {
+        this(INITIAL_CAPACITY);
     }
 
-    Object get(Object key) {
-        throw new UnsupportedOperationException();
+    public HashTable(int size) {
+        this(size, 0.5);
     }
 
-    Object remove(Object key) {
-        throw new UnsupportedOperationException();
+    public HashTable(int size, double loadFactor) {
+        this.elements = new Entry[size];
+        this.length = size;
+        this.loadFactor = loadFactor;
+        this.delete = new boolean[size];
     }
 
-    int size() {
-        throw new UnsupportedOperationException();
+    public Object put(Object key, Object value) {
+        int hc = Math.abs(key.hashCode() % length);
+
+        while (delete[hc] || elements[hc] != null && !elements[hc].getKey().equals(key)) {
+            hc = (hc + 1) % length;
+        }
+
+        if (elements[hc] == null) {
+            hc = Math.abs(key.hashCode() % length);
+
+            while (elements[hc] != null) {
+                hc = (hc + 1) % length;
+            }
+
+            elements[hc] = new Entry(key, value);
+            delete[hc] = false;
+            size++;
+
+            return null;
+        }
+
+        Object outValue = elements[hc].getValue();
+        elements[hc] = new Entry(key, value);
+        delete[hc] = false;
+
+        if ((double) size / length > loadFactor) {
+            increaseCapacity();
+        }
+
+        return outValue;
     }
 
+    public Object get(Object key) {
+        int hc = Math.abs(key.hashCode() % length);
+
+        while (delete[hc] || elements[hc] != null && !elements[hc].getKey().equals(key)) {
+            hc = (hc + 1) % length;
+        }
+
+        if (elements[hc] != null) {
+            return elements[hc].getValue();
+        } else {
+            return null;
+        }
+    }
+
+    public Object remove(Object key) {
+        int hc = Math.abs(key.hashCode() % length);
+
+        while (delete[hc] || elements[hc] != null && !elements[hc].getKey().equals(key)) {
+            hc = (hc + 1) % length;
+        }
+
+        if (elements[hc] == null) {
+            return null;
+        } else {
+            Object outValue = elements[hc].getValue();
+            elements[hc] = null;
+            delete[hc] = true;
+            size--;
+            return outValue;
+        }
+    }
+
+    public int size() {
+        return size;
+    }
+
+
+    private void increaseCapacity() {
+        Entry[] newElements = new Entry[length * 2];
+        delete = new boolean[length * 2];
+
+        for (int i = 0; i < length; i++) {
+            if (elements[i] == null) {
+                continue;
+            }
+
+            int hс = Math.abs(elements[i].getKey().hashCode() % (length * 2));
+
+            while (newElements[hс] != null) {
+                hс = (hс + 1) % (length * 2);
+            }
+
+            newElements[hс] = elements[i];
+        }
+
+        elements = newElements;
+        length *= 2;
+    }
+
+    private class Entry {
+        private final Object key,
+                             value;
+
+        public Object getKey(){
+            return key;
+        }
+
+        public Object getValue(){
+            return value;
+        }
+
+        public Entry(Object key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
 }
