@@ -52,7 +52,7 @@ public class HashTable {
         delete[hc] = false;
 
         if ((double) size / length > loadFactor) {
-            IncreaseCapacity();
+            increaseCapacity();
         }
 
         return outValue;
@@ -95,7 +95,7 @@ public class HashTable {
     }
 
 
-    private void IncreaseCapacity() {
+    private void increaseCapacity() {
         Entry[] newElements = new Entry[length * 2];
         delete = new boolean[length * 2];
 
